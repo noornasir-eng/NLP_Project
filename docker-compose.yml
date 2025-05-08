@@ -1,0 +1,26 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/app
+    ports:
+      - "50051:50051"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FORCE_CPU=true
+      - USE_LIGHTWEIGHT_MODEL=true
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    volumes:
+      - ./streamlit_app.py:/app/streamlit_app.py
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
+    environment:
+      - PYTHONUNBUFFERED=1

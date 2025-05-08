@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package agent;
+
+service Agent {
+  rpc GenerateStory (StoryRequest) returns (StoryResponse);
+  rpc TranslateStory (TranslateRequest) returns (TranslateResponse);
+  rpc GetTrendingTopics (EmptyRequest) returns (TopicsResponse);
+}
+
+message StoryRequest {
+  string topic = 1;
+  string genre = 2;
+  string length = 3;
+  string tone = 4;
+  string characters = 5;
+}
+
+message StoryResponse {
+  string story = 1;
+}
+
+message TranslateRequest {
+  string story = 1;
+  string language = 2;
+}
+
+message TranslateResponse {
+  string translated_story = 1;
+}
+
+message EmptyRequest {
+}
+
+message TopicsResponse {
+  repeated string topics = 1;
+}

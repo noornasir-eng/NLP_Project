@@ -1,0 +1,237 @@
+from huggingface_hub import login
+
+login()
+
+
+!pip install -q -U bitsandbytes
+!pip install -q -U transformers accelerate
+!pip install -q -U bitsandbytes transformers accelerate
+
+
+!pip install -q -U bitsandbytes
+!pip install -q -U transformers accelerate
+
+
+
+import pandas as pd
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+
+# Use Mistral 7B (quantized)
+model_name = "mistralai/Mistral-7B-Instruct-v0.1"
+
+# Load tokenizer
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+# Load quantized model (4-bit)
+bnb_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_use_double_quant=True,
+                                bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=torch.float16)
+
+model = AutoModelForCausalLM.from_pretrained(
+    model_name,
+    quantization_config=bnb_config,
+    device_map="auto"
+)
+
+# Load topics
+df = pd.read_csv("/content/final_TRENDS.csv")
+topics = df["Processed Data"].dropna().unique()
+
+# Display options
+print("📈 Trending Topics:")
+for i, topic in enumerate(topics, 1):
+    print(f"{i}. {topic}")
+
+# User selects topic
+while True:
+    try:
+        idx = int(input("Choose a topic number: "))
+        topic = topics[idx - 1]
+        break
+    except:
+        print("Invalid choice. Try again.")
+
+# Ask for genre
+genre = input("Choose genre (e.g., horror, comedy, romance): ").strip()
+
+# Prompt for generation
+prompt = (
+    f"Write a [{genre}] story about the trending topic: {topic}. "
+    f"The story should be highly creative, engaging, and complete with a clear beginning, middle, and end. "
+    f"For [{genre}], make sure to include elements typical of the genre — for example, if it's comedy, include jokes, irony, misunderstandings, or exaggeration. "
+    f"If it's fantasy, use magic, mythical creatures, or epic adventures. "
+    f"If it's horror, build suspense, fear, and a chilling atmosphere.\n\n"
+)
+
+
+# Tokenize and generate
+inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
+output = model.generate(
+    **inputs,
+    max_new_tokens=500,
+    do_sample=True,
+    temperature=0.9,
+    top_k=50,
+    top_p=0.95,
+    pad_token_id=tokenizer.eos_token_id
+)
+
+# Decode and print
+story = tokenizer.decode(output[0], skip_special_tokens=True)
+print("\n📜 Generated Story:\n")
+print(story)
+
+
+!python -m venv storyenv
+!source storyenv/bin/activate  # or storyenv\Scripts\activate on Windows
+!pip install googletrans==4.0.0-rc1
+
+
+!pip install googletrans==4.0.0-rc1
+
+
+import pandas as pd
+from googletrans import Translator, LANGUAGES
+from gtts import gTTS
+import os
+from IPython.display import Audio
+import io
+
+# Assume tokenizer and model are already loaded and on CUDA
+
+# Load trending topics
+df = pd.read_csv("/content/final_TRENDS.csv")
+topics = df["Processed Data"].dropna().unique()
+
+print("📈 Trending Topics:")
+for i, topic in enumerate(topics, 1):
+    print(f"{i}. {topic}")
+
+# Topic selection
+while True:
+    try:
+        idx = int(input("Choose a topic number: "))
+        topic = topics[idx - 1]
+        break
+    except:
+        print("Invalid choice. Try again.")
+
+#========================== Genre input ==============================
+genre = input("Choose genre (e.g., comedy, horror, fantasy, romance): ").strip()
+
+#======================= Story length input ==========================
+while True:
+    try:
+        length_tokens = int(input("Enter desired story length (number of words/tokens, e.g. 300, 500, 800): "))
+        break
+    except:
+        print("Invalid input. Enter a number.")
+
+#========================== Optional tone ============================
+tone = input("Optional: Choose a tone (e.g., funny, poetic, dark) or press Enter to skip: ").strip()
+tone_part = f"The tone of the story should be {tone}. " if tone else ""
+
+#====================== Optional characters ==========================
+characters = input("Optional: Enter your favorite character(s) (comma-separated), or press Enter to skip: ").strip()
+
+# Base prompt with or without characters
+if characters:
+    prompt = (
+        f"Write a [{genre}] story about the trending topic: {topic}. "
+        f"{tone_part}"
+        f"The story should include the characters: {characters}. "
+        f"It should be highly creative, engaging, and complete with a clear beginning, middle, and end. "
+        f"For [{genre}], make sure to include elements typical of the genre — for example, if it's comedy, make plot actually include jokes, irony, misunderstandings, or exaggeration. "
+        f"If it's fantasy, use magic, mythical creatures, or epic adventures. "
+        f"If it's horror, build suspense, fear, and a chilling atmosphere.\n\n"
+        f"Make it a proper short story with a proper start and proper ending with plot twists, very relevant to the theme, "
+        f"and of length approximately {length_tokens} words or tokens."
+    )
+else:
+    prompt = (
+        f"Write a [{genre}] story about the trending topic: {topic}. "
+        f"{tone_part} "
+        f"The story should be highly creative, engaging, and complete with a clear beginning, middle, and end. "
+        f"For [{genre}], make sure to include elements typical of the genre — for example, if it's comedy, make plot actually include jokes, irony, misunderstandings, or exaggeration. "
+        f"If it's fantasy, use magic, mythical creatures, or epic adventures. "
+        f"If it's horror, build suspense, fear, and a chilling atmosphere.\n\n"
+        f"Make it a proper short story with a proper start and proper ending with plot twists, very relevant to the theme, "
+        f"and of length approximately {length_tokens} words or tokens."
+    )
+
+#======================= Generate story ==============================
+inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
+output = model.generate(
+    **inputs,
+    max_new_tokens=length_tokens,
+    do_sample=True,
+    temperature=0.9,
+    top_k=50,
+    top_p=0.95,
+    pad_token_id=tokenizer.eos_token_id
+)
+
+#========================= Display story =============================
+story = tokenizer.decode(output[0], skip_special_tokens=True)
+print("\n📜 Generated Story:\n")
+print(story)
+#======================= Translate story =============================
+translator = Translator()
+translate_choice = input("\n🌍 Do you want to translate this story to another language? (yes/no): ").strip().lower()
+
+# If user selects 'no', still translate for audio
+if translate_choice == "yes":
+    print("\nAvailable language codes:")
+    for code, lang in LANGUAGES.items():
+        print(f"{code}: {lang}")
+
+    target_lang = input("\nEnter target language code for translation: ").strip()
+    try:
+        translated = translator.translate(story, dest=target_lang)
+        story_translated = translated.text
+        print(f"\n🌐 Translated Story ({LANGUAGES.get(target_lang, target_lang)}):\n")
+        print(story_translated)
+    except Exception as e:
+        print(f"⚠️ Translation failed: {e}")
+        story_translated = story  # Fallback to original
+
+
+#======================== Audio Narration =============================
+audio_choice = input("\n🔊 Do you want to generate audio narration of the story? (yes/no): ").strip().lower()
+if audio_choice == "yes":
+    # List all supported languages for gTTS
+    print("\n🎧 Supported Languages for Audio Narration:")
+    for code, lang in LANGUAGES.items():
+        print(f"{code}: {lang}")
+
+    # Choose target language for audio narration
+    target_lang = input("\nEnter the language code for audio narration: ").strip()
+
+    print(f"\n🎧 Generating and playing audio in: {LANGUAGES.get(target_lang, target_lang).title()}")
+
+    try:
+        # Translate the story
+        translated = translator.translate(story, dest=target_lang)
+        story_translated = translated.text
+        print(f"\n🌐 Translated Story ({LANGUAGES.get(target_lang, target_lang)}):\n")
+
+        # Generate and play the audio in the translated language for narration
+        tts = gTTS(text=story_translated, lang=target_lang)
+        audio_bytes = io.BytesIO()
+        tts.write_to_fp(audio_bytes)
+        audio_bytes.seek(0)
+        display(Audio(audio_bytes.read(), autoplay=True))
+
+    except Exception as e:
+        print(f"⚠️ Audio generation failed: {e}")
+
+
+
+
+!pip install gTTS
+
+
+!pip install googletrans==4.0.0-rc1 gTTS IPython
+
+
+
