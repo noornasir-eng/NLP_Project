@@ -65,3 +65,4 @@ The application relies on NLP models and libraries to perform trend analysis and
 - `Basic Request`: Response Structure: The communication between the client and server follows a basic request-response pattern using gRPC. More advanced features like streaming or bidirectional communication are not yet supported.
 - `No User Authentication or Role Management`: There is no built-in user authentication or role-based access management in the system. This can be added as an enhancement for future releases.
 
+
