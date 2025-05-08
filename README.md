@@ -57,12 +57,22 @@ docker run -p 50051:50051 trendstory
 - `finalnlpbackend.py`: Contains NLP logic and integration.
 - `Dockerfile`: For containerized deployment.
 
-## Model Sources
-The application relies on NLP models and libraries to perform trend analysis and data processing. These models are integrated and specified in the finalnlpbackend.py module. Currently, these models are focused on basic text analysis and are ready for extensions to include more complex models and additional NLP tasks.
+## Frontend (Streamlit)
+TrendStory includes an interactive Streamlit frontend that allows users to explore NLP-based trend analysis visually.
 
-## Limitations
-- `Frontend`: There is currently no frontend available. The service is backend-only, and users interact with it through gRPC.
-- `Basic Request`: Response Structure: The communication between the client and server follows a basic request-response pattern using gRPC. More advanced features like streaming or bidirectional communication are not yet supported.
-- `No User Authentication or Role Management`: There is no built-in user authentication or role-based access management in the system. This can be added as an enhancement for future releases.
+## Features:
+Text input and upload support
 
+Real-time trend detection and visualization
+
+Integration with the gRPC backend for live data processing
+
+## Run the Frontend:
+Make sure your gRPC server is running first. Then launch the frontend:
+
+bash
+Copy
+Edit
+streamlit run streamlit_app.py
+Replace streamlit_app.py with your actual Streamlit script name if different.
 
